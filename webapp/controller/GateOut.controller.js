@@ -72,6 +72,9 @@ sap.ui.define([
                 case "scn":
                     oLabel.setText("Sub Contract Challan Number");
                     break;
+                case "rar":
+                    oLabel.setText("Material Document");
+                    break;
                 default:
                     oLabel.setText("Invoice Number");
             }
@@ -86,19 +89,7 @@ sap.ui.define([
             this._fetchGateOutData(sInvoiceNo);
         },
 
-        // onLiveChangeInvoiceNo: function (oEvent) {
-        //     let sInvoiceNo = oEvent.getParameter("value") || "";
 
-        //     if (sInvoiceNo.length === 10) {
-        //         // Debounce so it won’t fire multiple times quickly
-        //         clearTimeout(this._invoiceTimer);
-        //         this._invoiceTimer = setTimeout(() => {
-        //             this._fetchGateOutData(sInvoiceNo);
-        //         }, 500);
-        //     }else{
-        //         return;
-        //     }
-        // },
         _getEntityForCategory: function (sCategory) {
             switch (sCategory) {
                 case "sto":
@@ -107,6 +98,8 @@ sap.ui.define([
                     return "/F2SCREEN"; // Normal Invoice entity
                 case "scn":
                     return "/JSNSCREEN"; // Subcontract Challan entity
+                case "rar":
+                    return "/materialDocumentItem"; // Subcontract Challan entity
                 default:
                     return "/F2SCREEN"; // fallback
             }
@@ -122,15 +115,27 @@ sap.ui.define([
             // 1️⃣ Get selected category
             let sCategory = oView.byId("idCategoryDropdown").getSelectedKey();
             let sEntitySet = this._getEntityForCategory(sCategory);
-
+            let aFilters = [];
             // 2️⃣ Create filter
-            let aFilters = [
-                new sap.ui.model.Filter("InvoiceNumber", sap.ui.model.FilterOperator.EQ, sInvoiceNo)
-            ];
+            if (sEntitySet !== '/materialDocumentItem') {
+                aFilters = [
+                    new sap.ui.model.Filter("InvoiceNumber", sap.ui.model.FilterOperator.EQ, sInvoiceNo)
+                ];
+            } else {
+                var oAndFilter = [
+                    new sap.ui.model.Filter("MaterialDocument", sap.ui.model.FilterOperator.EQ, sInvoiceNo),
+                    new sap.ui.model.Filter("MaterialDocumentYear", sap.ui.model.FilterOperator.EQ, this.documentYear.split(' ')[0].trim()) // 👈 extra filter
+                ];
 
+                // Combine them with AND
+                aFilters = new sap.ui.model.Filter({
+                    filters: oAndFilter,
+                    and: true
+                });
+            }
             // 3️⃣ Read dynamic entity
             oModel.read(sEntitySet, {
-                filters: aFilters,
+                filters: [aFilters],
                 // urlParameters: { "$expand": "to_ITEM" },
                 success: function (oData) {
                     oPage.setBusy(false);
@@ -142,10 +147,23 @@ sap.ui.define([
                         return;
                     }
                     let oHeader = oData.results[0];
+                    let aItems;
                     oView.getModel("header").setData(oHeader);
-                    let aItems = oData.results.map(function (oEntry) {
-                        return Object.assign({}, oEntry, { InvoiceNumber: oHeader.InvoiceNumber });
-                    });
+                    if (sEntitySet !== '/materialDocumentItem') {
+                        aItems = oData.results.map(function (oEntry) {
+                            return Object.assign({}, oEntry, { InvoiceNumber: oHeader.InvoiceNumber });
+                        });
+                    } else {
+                        aItems = oData.results.map(function (item) {
+                            return {
+                                LineItem: item.MaterialDocumentItem,
+                                Material: item.Material,
+                                InvoiceNumber:sInvoiceNo,
+                                InvoiceQuantity: item.QuantityInBaseUnit,
+                                UoM: item.MaterialBaseUnit // optional, if you need unit
+                            };
+                        });
+                    }
                     oView.getModel("item").setData(aItems);
                 },
                 error: function () {
@@ -204,7 +222,7 @@ sap.ui.define([
 
                         if (oResponse && oResponse.error && oResponse.error.message) {
                             var sMessage = oResponse.error.message.value; // "Invoice No. 90000000 already used"
-                            sap.m.MessageToast.show(sMessage +", Gate Outward creation cancelled !");
+                            sap.m.MessageToast.show(sMessage + ", Gate Outward creation cancelled !");
                         } else {
                             sap.m.MessageToast.show("An unexpected error occurred");
                         }
@@ -262,7 +280,7 @@ sap.ui.define([
                     oPage.setBusy(false);
                     sap.m.MessageToast.show("Error updating Invoice " + sInvoiceNo);
                     console.log(oError);
-                    
+
                 }
             });
         },
@@ -342,42 +360,240 @@ sap.ui.define([
         //     oVHD.open();
         // }
 
+        // onValueHelpRequest: function () {
+        //     var that = this;
+        //     let sCategory = this.getView().byId("idCategoryDropdown").getSelectedKey();
+        //     const mCategoryToDocType = {
+        //         "sto": "JSTO", // STO Invoice entity
+        //         "inv": "F2",   // Normal Invoice entity
+        //         "scn": "JSN"   // Subcontract Challan entity
+        //     };
+        //     // ===================================================
+        //     // 1. Define columns for Value Help
+        //     // ===================================================
+        //     var aCols = [
+        //         { label: "Billing Document", path: "BillingDocument", width: "12rem" },
+        //         { label: "Billing Document Type", path: "BillingDocumentType", width: "12rem" }
+        //     ];
+
+
+
+        //     let sDocType = mCategoryToDocType[sCategory] || "";
+        //     // ===================================================
+        //     // 2. Create the ValueHelpDialog
+        //     // ===================================================
+        //     var oVHD = new sap.ui.comp.valuehelpdialog.ValueHelpDialog({
+        //         title: "Select Billing Document",
+        //         supportMultiselect: false,
+        //         key: "BillingDocument",            // key field
+        //         descriptionKey: "BillingDocument", // field shown in description
+        //         ok: function (e) {
+        //             var t = e.getParameter("tokens");
+        //             var sKey = t.length ? t[0].getKey() : "";
+        //             that.byId("idRAII_DocInvNo").setValue(sKey);
+        //             that.byId("idRAII_DocInvNo").fireChange({
+        //                 value: sKey,
+        //                 newValue: sKey,
+        //                 valid: true
+        //             });
+
+        //             oVHD.close();
+        //         },
+        //         cancel: function () { oVHD.close(); },
+        //         afterClose: function () { oVHD.destroy(); }
+        //     });
+
+        //     // ===================================================
+        //     // 3. Configure Table inside ValueHelpDialog
+        //     // ===================================================
+        //     var oTable = oVHD.getTable();
+
+        //     // Build mandatory filter for DocumentType
+        //     var oDocTypeFilter = new sap.ui.model.Filter("BillingDocumentType", sap.ui.model.FilterOperator.EQ, sDocType);
+
+        //     if (oTable.bindRows) {
+        //         // Grid Table (sap.ui.table.Table)
+        //         aCols.forEach(c => oTable.addColumn(new sap.ui.table.Column({
+        //             label: c.label,
+        //             template: new sap.m.Text({ text: "{" + c.path + "}" }),
+        //             width: c.width
+        //         })));
+
+        //         oTable.bindRows({
+        //             path: "/billingdocumentf4",
+        //             filters: [oDocTypeFilter]   // ✅ Apply filter here
+        //         });
+
+        //     } else {
+        //         // Responsive Table (sap.m.Table)
+        //         aCols.forEach(c => oTable.addColumn(new sap.m.Column({
+        //             header: new sap.m.Label({ text: c.label })
+        //         })));
+
+        //         oTable.bindItems({
+        //             path: "/billingdocumentf4",
+        //             filters: [oDocTypeFilter],   // ✅ Apply filter here
+        //             template: new sap.m.ColumnListItem({
+        //                 cells: aCols.map(c => new sap.m.Text({ text: "{" + c.path + "}" }))
+        //             })
+        //         });
+        //     }
+
+        //     // ===================================================
+        //     // 4. Central Search Function
+        //     // ===================================================
+        //     var fnDoSearch = function (sQuery) {
+        //         sQuery = (sQuery || "").trim();
+
+        //         var sAgg = oTable.bindRows ? "rows" : "items";
+        //         var oBinding = oTable.getBinding(sAgg);
+
+        //         if (!sQuery) {
+        //             // Clear filters if query empty
+        //             oBinding.filter([]);
+        //             return;
+        //         }
+
+        //         // --- Step A: Try client-side filtering ---
+        //         var aFilters = aCols.map(c =>
+        //             new sap.ui.model.Filter(c.path, sap.ui.model.FilterOperator.Contains, sQuery)
+        //         );
+
+        //         // combine them with OR
+        //         var oOrFilter = new sap.ui.model.Filter({
+        //             filters: aFilters,
+        //             and: false
+        //         });
+
+        //         oBinding.filter([oOrFilter], "Application");
+        //         var oDocTypeFilter = new sap.ui.model.Filter("BillingDocumentType", sap.ui.model.FilterOperator.EQ, sDocType);
+        //         // --- Step B: If no results, fallback to server-side search ---
+        //         if (oBinding.getLength() === 0) {
+        //             var oModel = that.getView().getModel();
+        //             // Server-side (ODataModel)
+        //             oModel.read("/billingdocumentf4", {
+        //                 filters: [oOrFilter, oDocTypeFilter],        // <-- use Filter object, not string
+        //                 urlParameters: { "$top": 200 },
+        //                 success: function (oData) {
+        //                     var oJson = new sap.ui.model.json.JSONModel({
+        //                         billingdocumentf4: oData.results
+        //                     });
+        //                     oTable.setModel(oJson);
+        //                     // rebind to make sure busy state clears
+        //                     if (oTable.bindRows) {
+        //                         oTable.bindRows({ path: "/billingdocumentf4" });
+        //                     } else {
+        //                         oTable.bindItems({
+        //                             path: "/billingdocumentf4",
+        //                             template: new sap.m.ColumnListItem({
+        //                                 cells: aCols.map(c => new sap.m.Text({ text: "{" + c.path + "}" }))
+        //                             })
+        //                         });
+        //                     }
+        //                     oTable.setBusy(false);
+        //                     oVHD.setBusy(false);
+        //                 },
+        //                 error: function () {
+        //                     sap.m.MessageToast.show("Server search failed");
+        //                 }
+        //             });
+        //         }
+        //     };
+
+        //     // ===================================================
+        //     // 5. SearchField + FilterBar Setup
+        //     // ===================================================
+        //     var oBasicSearch = new sap.m.SearchField({
+        //         width: "100%",
+        //         search: function (oEvt) {   // triggers on Enter or search icon
+        //             fnDoSearch(oEvt.getSource().getValue());
+        //         }
+        //         // Optional: add liveChange if you want instant typing search
+        //         // liveChange: function (oEvt) {
+        //         //     fnDoSearch(oEvt.getSource().getValue());
+        //         // }
+        //     });
+
+        //     var oFilterBar = new sap.ui.comp.filterbar.FilterBar({
+        //         advancedMode: true,
+        //         search: function () {
+        //             fnDoSearch(oBasicSearch.getValue());
+        //         }
+        //     });
+        //     oFilterBar.setBasicSearch(oBasicSearch);
+        //     oVHD.setFilterBar(oFilterBar);
+
+        //     // ===================================================
+        //     // 6. Prefill Search with existing value (if any)
+        //     // ===================================================
+        //     var sPrefill = this.byId("idRAII_DocInvNo").getValue();
+        //     oBasicSearch.setValue(sPrefill);
+        //     oVHD.setBasicSearchText(sPrefill);
+
+        //     // ===================================================
+        //     // 7. Attach model and open dialog
+        //     // ===================================================
+        //     oTable.setModel(this.getView().getModel());
+        //     oVHD.open();
+        // },
+
         onValueHelpRequest: function () {
             var that = this;
-
-            // ===================================================
-            // 1. Define columns for Value Help
-            // ===================================================
-            var aCols = [
-                { label: "Billing Document", path: "BillingDocument", width: "12rem" },
-                { label: "Billing Document Type", path: "BillingDocumentType", width: "12rem" }
-            ];
             let sCategory = this.getView().byId("idCategoryDropdown").getSelectedKey();
+
             const mCategoryToDocType = {
                 "sto": "JSTO", // STO Invoice entity
                 "inv": "F2",   // Normal Invoice entity
                 "scn": "JSN"   // Subcontract Challan entity
             };
 
-            let sDocType = mCategoryToDocType[sCategory] || "";
+            // ===================================================
+            // 1. Define columns for Value Help
+            // ===================================================
+            var aCols, sEntity, sKeyField, sDescField, oDocTypeFilter;
+
+            if (sCategory === "rar") {
+                // ✅ RAR case
+                aCols = [
+                    { label: "Material Document", path: "MaterialDocument", width: "12rem" },
+                    { label: "Material Document Year", path: "MaterialDocumentYear", width: "12rem" }
+                ];
+                sEntity = "/materialDocument";
+                sKeyField = "MaterialDocument";   // only year goes to idRAII_DocInvNo
+                sDescField = "MaterialDocumentYear";
+                oDocTypeFilter = null; // no BillingDocumentType filter here
+            } else {
+                // ✅ Default case (billing document logic stays as-is)
+                aCols = [
+                    { label: "Billing Document", path: "BillingDocument", width: "12rem" },
+                    { label: "Billing Document Type", path: "BillingDocumentType", width: "12rem" }
+                ];
+                sEntity = "/billingdocumentf4";
+                sKeyField = "BillingDocument";
+                sDescField = "BillingDocument";
+                let sDocType = mCategoryToDocType[sCategory] || "";
+                oDocTypeFilter = new sap.ui.model.Filter("BillingDocumentType", sap.ui.model.FilterOperator.EQ, sDocType);
+            }
+
             // ===================================================
             // 2. Create the ValueHelpDialog
             // ===================================================
             var oVHD = new sap.ui.comp.valuehelpdialog.ValueHelpDialog({
-                title: "Select Billing Document",
+                title: "Select Document",
                 supportMultiselect: false,
-                key: "BillingDocument",            // key field
-                descriptionKey: "BillingDocument", // field shown in description
+                key: sKeyField,
+                descriptionKey: sDescField,
                 ok: function (e) {
                     var t = e.getParameter("tokens");
                     var sKey = t.length ? t[0].getKey() : "";
+                    var stext = t.length ? t[0].getText() : "";
                     that.byId("idRAII_DocInvNo").setValue(sKey);
+                    that.documentYear = stext;
                     that.byId("idRAII_DocInvNo").fireChange({
                         value: sKey,
                         newValue: sKey,
                         valid: true
                     });
-
                     oVHD.close();
                 },
                 cancel: function () { oVHD.close(); },
@@ -389,9 +605,6 @@ sap.ui.define([
             // ===================================================
             var oTable = oVHD.getTable();
 
-            // Build mandatory filter for DocumentType
-            var oDocTypeFilter = new sap.ui.model.Filter("BillingDocumentType", sap.ui.model.FilterOperator.EQ, sDocType);
-
             if (oTable.bindRows) {
                 // Grid Table (sap.ui.table.Table)
                 aCols.forEach(c => oTable.addColumn(new sap.ui.table.Column({
@@ -401,8 +614,8 @@ sap.ui.define([
                 })));
 
                 oTable.bindRows({
-                    path: "/billingdocumentf4",
-                    filters: [oDocTypeFilter]   // ✅ Apply filter here
+                    path: sEntity,
+                    filters: oDocTypeFilter ? [oDocTypeFilter] : []
                 });
 
             } else {
@@ -412,8 +625,8 @@ sap.ui.define([
                 })));
 
                 oTable.bindItems({
-                    path: "/billingdocumentf4",
-                    filters: [oDocTypeFilter],   // ✅ Apply filter here
+                    path: sEntity,
+                    filters: oDocTypeFilter ? [oDocTypeFilter] : [],
                     template: new sap.m.ColumnListItem({
                         cells: aCols.map(c => new sap.m.Text({ text: "{" + c.path + "}" }))
                     })
@@ -430,42 +643,36 @@ sap.ui.define([
                 var oBinding = oTable.getBinding(sAgg);
 
                 if (!sQuery) {
-                    // Clear filters if query empty
                     oBinding.filter([]);
                     return;
                 }
 
-                // --- Step A: Try client-side filtering ---
+                // --- Client-side filtering
                 var aFilters = aCols.map(c =>
                     new sap.ui.model.Filter(c.path, sap.ui.model.FilterOperator.Contains, sQuery)
                 );
 
-                // combine them with OR
-                var oOrFilter = new sap.ui.model.Filter({
-                    filters: aFilters,
-                    and: false
-                });
+                var oOrFilter = new sap.ui.model.Filter({ filters: aFilters, and: false });
 
-                oBinding.filter([oOrFilter], "Application");
-                var oDocTypeFilter = new sap.ui.model.Filter("BillingDocumentType", sap.ui.model.FilterOperator.EQ, sDocType);
-                // --- Step B: If no results, fallback to server-side search ---
+                var aFinalFilters = oDocTypeFilter ? [oOrFilter, oDocTypeFilter] : [oOrFilter];
+                oBinding.filter(aFinalFilters, "Application");
+
+                // --- Server-side fallback
                 if (oBinding.getLength() === 0) {
                     var oModel = that.getView().getModel();
-                    // Server-side (ODataModel)
-                    oModel.read("/billingdocumentf4", {
-                        filters: [oOrFilter, oDocTypeFilter],        // <-- use Filter object, not string
+                    oModel.read(sEntity, {
+                        filters: aFinalFilters,
                         urlParameters: { "$top": 200 },
                         success: function (oData) {
-                            var oJson = new sap.ui.model.json.JSONModel({
-                                billingdocumentf4: oData.results
-                            });
+                            var oJson = new sap.ui.model.json.JSONModel([]);
+                            oJson.setProperty(sEntity, oData.results);
                             oTable.setModel(oJson);
-                            // rebind to make sure busy state clears
+
                             if (oTable.bindRows) {
-                                oTable.bindRows({ path: "/billingdocumentf4" });
+                                oTable.bindRows({ path: sEntity });
                             } else {
                                 oTable.bindItems({
-                                    path: "/billingdocumentf4",
+                                    path: sEntity,
                                     template: new sap.m.ColumnListItem({
                                         cells: aCols.map(c => new sap.m.Text({ text: "{" + c.path + "}" }))
                                     })
@@ -486,13 +693,9 @@ sap.ui.define([
             // ===================================================
             var oBasicSearch = new sap.m.SearchField({
                 width: "100%",
-                search: function (oEvt) {   // triggers on Enter or search icon
+                search: function (oEvt) {
                     fnDoSearch(oEvt.getSource().getValue());
                 }
-                // Optional: add liveChange if you want instant typing search
-                // liveChange: function (oEvt) {
-                //     fnDoSearch(oEvt.getSource().getValue());
-                // }
             });
 
             var oFilterBar = new sap.ui.comp.filterbar.FilterBar({

@@ -48,12 +48,11 @@
                                     <core:Item id="_IDGenItem1" key="sto" text="STO Invoice No."/>
                                     <core:Item id="_IDGenItem2" key="inv" text="Invoice No"/>
                                     <core:Item id="_IDGenItem3" key="scn" text="Sub Contract Challan No"/>
+                                    <core:Item id="_IDGenItem4" key="rar" text="Rejection &amp; Returnable"/>
                                 </ComboBox>
                             </VBox>
                             <VBox id="_IDGenVBox2" width="20%">
                                 <Label id="idInvoiceLabel" text="Invoice Number" required="true"/>
-                                <!-- <Input id="idRAII_DocInvNo" value="" change="onChangeRAII_DocInvNo" liveChange="onLiveChangeInvoiceNo" maxLength="16" width="75%"/> -->
-                                <!-- <smartMultiInput:SmartMultiInput id="idRAII_DocInvNo" value="{BillingDocument}" entitySet="billingdocumentf4" showValueHelp="true" width="75%" change="onChangeRAII_DocInvNo"/> -->
                                 <MultiInput id="idRAII_DocInvNo" showValueHelp="true" change="onChangeRAII_DocInvNo" liveChange="onLiveChangeInvoiceNo" valueHelpRequest="onValueHelpRequest" width="75%" placeholder="Select..." />
 
                             </VBox>
