@@ -1,0 +1,30 @@
+/* Enter your custom styles here */
+/* Target the Page header bar */
+.ICTBCustom .sapMPageHeader .sapMBar {
+    background: linear-gradient(
+        90deg,
+        #0057d2 0%,
+        rgba(0, 87, 210, 0.5) 75%,
+        #0057d2 100%
+    ),
+    url(../images/GlobalActionBar.jpg) no-repeat center center;
+    background-size: cover;
+    color: white;
+}
+
+/* Make title text white */
+.ICTBCustom .sapMPageHeader .sapMBar .sapMTitle {
+    color: white !important;
+    font-weight: 600;
+}
+
+/* Style header buttons inside Page title bar */
+.ICTBCustom .sapMPageHeader .sapMBar .sapMBtnInner {
+    color: white !important;
+    border-color: white !important;
+}
+
+/* Optional hover effect */
+.ICTBCustom .sapMPageHeader .sapMBar .sapMBtnInner:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
