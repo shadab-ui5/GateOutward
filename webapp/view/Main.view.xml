@@ -1,0 +1,23 @@
+<mvc:View controllerName="gateout.controller.Main"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m">
+	<App id="_IDGenApp">
+		<pages >
+			<Page id="idMain__Page" enableScrolling="false" title="{i18n>mainPagetitle}" class="MainPage" showHeader="true" showNavButton="true" navButtonPress="onNavBack">
+
+				<content>
+					<Button id="_IDGenButton21" icon="sap-icon://nav-back" type="Transparent" press="onNavBack" ariaLabelledBy="editButtonLabel"/>
+					<IconTabBar id="idIconTabBarMain" applyContentPadding="false" selectedKey="RouteGateOut" expandable="false" headerBackgroundDesign="Solid" select="onSelectTabItem" stretchContentHeight="true" class="ICTBCustom">
+						<items>
+							<IconTabFilter id="_IDGenIconTabFilter1" text="Gate Outward" key="RouteGateOut"/>
+							<IconTabFilter id="_IDGenIconTabFilter2" text="Edit Outward" key="RouteGateOutEdit" />
+						</items>
+						<content>
+							<NavContainer id="Main__NavContainer" height="100%" width="100%"/>
+						</content>
+					</IconTabBar>
+				</content>
+			</Page>
+		</pages>
+	</App>
+</mvc:View>

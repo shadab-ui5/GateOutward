@@ -33,6 +33,14 @@
           "localUri": "localService/mainService/metadata.xml",
           "odataVersion": "2.0"
         }
+      },
+      "vendorService": {
+        "uri": "/sap/opu/odata/sap/ZMM_VEND_PORT_SER_BIND/",
+        "type": "OData",
+        "settings": {
+          "localUri": "localService/vendorService/metadata.xml",
+          "odataVersion": "2.0"
+        }
       }
     },
     "crossNavigation": {
@@ -96,7 +104,17 @@
           "defaultOperationMode": "Server",
           "defaultBindingMode": "TwoWay"
         }
+      },
+      "vendorModel": {
+        "dataSource": "vendorService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
       }
+      
     },
     "resources": {
       "css": [
@@ -124,19 +142,56 @@
           "target": [
             "TargetGateOut"
           ]
+        },
+        {
+          "name": "RouteGateOutEdit",
+          "pattern": "edit",
+          "target": [
+            "TargetGateOutEdit"
+          ]
+        },
+        {
+          "name": "RouteGateOutDetail",
+          "pattern": "detail",
+          "target": [
+            "TargetGateOutDetail"
+          ]
         }
       ],
       "targets": {
-        "TargetGateOut": {
+         "TargetGateOut": {
           "id": "GateOut",
-          "name": "GateOut"
+          "name": "GateOut",
+          "viewType": "XML",
+          "viewLevel": 2,
+          "controlId": "Main__NavContainer",
+          "controlAggregation": "pages",
+          "clearControlAggregation": true
+        },
+         "TargetGateOutEdit": {
+          "id": "GateOutHead",
+          "name": "GateOutHead",
+          "viewType": "XML",
+          "viewLevel": 2,
+          "controlId": "Main__NavContainer",
+          "controlAggregation": "pages",
+          "clearControlAggregation": true
+        },
+        "TargetGateOutDetail": {
+          "id": "GateOutDetail",
+          "name": "GateOutDetail",
+          "viewType": "XML",
+          "viewLevel": 2,
+          "controlId": "Main__NavContainer",
+          "controlAggregation": "pages",
+          "clearControlAggregation": true
         }
       }
     },
     "rootView": {
-      "viewName": "gateout.view.App",
+      "viewName": "gateout.view.Main",
       "type": "XML",
-      "id": "App",
+      "id": "Main",
       "async": true
     }
   }

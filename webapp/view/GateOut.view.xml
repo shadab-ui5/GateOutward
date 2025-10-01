@@ -8,8 +8,8 @@
     xmlns:upload="sap.m.upload"
     xmlns:svm="sap.ui.comp.smartvariants"
     xmlns:smartMultiInput="sap.ui.comp.smartmultiinput">
-    <Page id="page" title="Outward Gate Portal" class="ICTBCustom">
-        <f:DynamicPage id="_IDGenDynamicPage2" headerExpanded="{ExpandModel>/headerExpanded}" toggleHeaderOnTitleClick="true" preserveHeaderStateOnScroll="true" headerPinned="true">
+    <!-- <Page id="page" title="Outward Gate Portal" class="ICTBCustom"> -->
+        <f:DynamicPage id="page" headerExpanded="{ExpandModel>/headerExpanded}" toggleHeaderOnTitleClick="true" preserveHeaderStateOnScroll="true" headerPinned="true">
             <f:title>
                 <f:DynamicPageTitle id="_IDGenDynamicPageTitle1">
                     <f:navigationActions>
@@ -36,10 +36,9 @@
                                 <Label id="_IDGenLabel" text="Plant" required="true"/>
 
                                 <ComboBox id="idDropdownPlant" selectedKey="" width="75%" selectionChange="onSelectPlant" items="{
-                                        path: '/',
-                                        sorter: { path: 'Plant' }
+                                        path: 'PlantModel>/'
                                         }">
-                                    <core:Item id="_IDGenItem" key="{Plant}" text="{Plant} - {PlantName}"/>
+                                    <core:Item id="_IDGenItem" key="{PlantModel>Plant}" text="{PlantModel>Plant} - {PlantModel>Plantname}"/>
                                 </ComboBox>
                             </VBox>
                             <VBox id="_IDGenVBox1" width="20%">
@@ -128,5 +127,5 @@
                 </VBox>
             </f:content>
         </f:DynamicPage>
-    </Page>
+    <!-- </Page> -->
 </mvc:View>

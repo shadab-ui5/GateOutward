@@ -31,9 +31,11 @@ sap.ui.define([
             this.selected_Po_Scheduling_Value = undefined;
             let oHeaderModel = new sap.ui.model.json.JSONModel({});
             let oItemModel = new sap.ui.model.json.JSONModel({});
+            let oPlantModel = new sap.ui.model.json.JSONModel({});
             this.getView().setModel(oHeaderModel, "header");
             // Bind items
             this.getView().setModel(oItemModel, "item");
+            this.getView().setModel(oPlantModel, "PlantModel");
 
             let currentYear = new Date().getFullYear();
             let currentMonth = new Date().getMonth();
@@ -58,6 +60,27 @@ sap.ui.define([
             this.getPlantData();
         },
         _onRouteMatched: function () { },
+        getPlantData: function () {
+            let oModel = this.getOwnerComponent().getModel("vendorModel");
+            let oPlantModel = this.getView().getModel('PlantModel');
+            let sUser = sap.ushell?.Container?.getUser().getId() || "CB9980000018";
+            let aFilters = [new sap.ui.model.Filter("Userid", "EQ", sUser)];
+            // let aFilters = [];
+
+            oModel.read("/UserIdToPlant", {
+                filters: aFilters,
+                urlParameters: {
+                    "$top": 1000,
+                    "$skip": 0
+                },
+                success: (oData) => {
+                    oPlantModel.setData(oData.results)
+                },
+                error: () => {
+                    sap.m.MessageToast.show("Error fetching Plants.");
+                }
+            });
+        },
         onCategoryChange: function (oEvent) {
             let sKey = oEvent.getParameter("selectedItem").getKey();
             let oLabel = this.byId("idInvoiceLabel");
@@ -158,7 +181,7 @@ sap.ui.define([
                             return {
                                 LineItem: item.MaterialDocumentItem,
                                 Material: item.Material,
-                                InvoiceNumber:sInvoiceNo,
+                                InvoiceNumber: sInvoiceNo,
                                 InvoiceQuantity: item.QuantityInBaseUnit,
                                 UoM: item.MaterialBaseUnit // optional, if you need unit
                             };
@@ -232,23 +255,7 @@ sap.ui.define([
                 }
             });
         },
-        getPlantData: function () {
-            let that = this;
-            var oModel = this.getOwnerComponent().getModel();
-            let plantModel = new sap.ui.model.json.JSONModel();
-            //let odataModel = new sap.ui.model.odata.v2.ODataModel("NorthwindService/V2/(S(jjlmjbf1oszuuecc251trygy))/OData/OData.svc");
-            oModel.read("/plantF4Help", {
-                urlParameters: that.oParameters,
-                success: function (oResponse) {
-                    //MessageBox.success("Success");
-                    plantModel.setData(oResponse.results);
-                    that.getView().byId("idDropdownPlant").setModel(plantModel);
-                },
-                error: function (oError) {
-                    MessageBox.error("Failed to load plant list");
-                }
-            });
-        },
+
         _UpdateItemData: function (sInvoiceNo) {
             var oModel = this.getOwnerComponent().getModel();
             var oView = this.getView();

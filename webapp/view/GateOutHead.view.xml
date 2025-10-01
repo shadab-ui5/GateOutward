@@ -1,0 +1,127 @@
+<mvc:View controllerName="gateout.controller.GateOutHead"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:fb="sap.ui.comp.filterbar"
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:svm="sap.ui.comp.smartvariants"
+    xmlns:smartMultiInput="sap.ui.comp.smartmultiinput"
+    xmlns:plugins="sap.m.plugins"
+    xmlns:columnmenu="sap.m.table.columnmenu"
+    xmlns:sap.ui.fl="sap.ui.fl"
+    xmlns:sap.ui.dt="sap.ui.dt"
+    xmlns:dnd="sap.ui.core.dnd"
+    xmlns:app="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1">
+
+    <f:DynamicPage id="_IDGenDynamicPage2" class="sapUiNoContentPadding" headerExpanded="true">
+        <f:title>
+            <f:DynamicPageTitle id="_IDGenDynamicPageTitle1">
+
+            </f:DynamicPageTitle>
+        </f:title>
+        <f:header>
+            <f:DynamicPageHeader id="_IDGenDynamicPageHeader2" class="myCustomHeader">
+                <f:content>
+                    <!-- <Panel id="idPanelRAPO" class="sapUiContentPadding" headerText="General Data" visible="true"> -->
+                    <fb:FilterBar id="filterbar" useToolbar="false" search=".onFilterGo" filterChange=".onFilterChange" afterVariantLoad=".onAfterVariantLoad">
+                        <fb:filterGroupItems>
+                            <!-- Company Code -->
+
+                            <!-- Accounting Document -->
+                            <fb:FilterGroupItem id="FilterGroupItem2" name="Gate Entry No" label="Gate Entry No" groupName="Group1" visibleInFilterBar="true">
+                                <fb:control>
+                                    <MultiInput id="idCustomer" width="100%" placeholder="Enter Gate Entry No" showValueHelp="true" valueHelpRequest="onAsnValueHelp" submit=".onInvoiceValueSubmit" />
+                                </fb:control>
+                            </fb:FilterGroupItem>
+                            <!-- Supplier -->
+                            <fb:FilterGroupItem id="FilterGroupItem5" name="Invoice No" label="Invoice No" groupName="Group1" visibleInFilterBar="true">
+                                <fb:control>
+                                    <MultiInput id="idAccountingDocument" showValueHelp="true" valueHelpRequest="onInvoiceValueHelp" width="75%" placeholder="Select Invoice No"/>
+                                </fb:control>
+                            </fb:FilterGroupItem>
+
+                        </fb:filterGroupItems>
+                    </fb:FilterBar>
+                </f:content>
+            </f:DynamicPageHeader>
+        </f:header>
+        <f:content>
+            <VBox id="_IDGenVBox">
+
+                <Table id="persoTable" items="{path: 'getListReport>/'}" ariaLabelledBy="title" fixedLayout="Strict" autoPopinMode="true" growing="true" sticky="ColumnHeaders,HeaderToolbar" popinLayout="GridSmall" growingScrollToLoad="true" growingThreshold="20" updateStarted="onUpdateStartPoHeaderTable" itemPress="onLineItemPress" selectionChange="onSelectionChange">
+
+                    <headerToolbar>
+                        <OverflowToolbar>
+                            <ToolbarSpacer/>
+                            <Button icon="sap-icon://action-settings" press="openPersoDialog" tooltip="Settings"/>
+                        </OverflowToolbar>
+                    </headerToolbar>
+
+                    <infoToolbar>
+                        <OverflowToolbar id="filterInfo" visible="false" design="Info" active="true" press="onFilterInfoPress">
+                            <Text id="filterInfoText" wrapping="false" text="Table filter active" />
+                            <ToolbarSpacer />
+                            <!-- <Button tooltip="Remove All Filters" icon="sap-icon://decline" type="Transparent" press="onClearFilterPress" /> -->
+                        </OverflowToolbar>
+                    </infoToolbar>
+
+                    <!-- Columns -->
+                    <columns>
+                        <Column id="colGateEntryNo" headerMenu="menu">
+                            <header>
+                                <Text text="Gate Entry Number"/>
+                            </header>
+                        </Column>
+                        <Column id="colPlant" headerMenu="menu">
+                            <header>
+                                <Text text="Plant"/>
+                            </header>
+                        </Column>
+                        <Column id="colTransporterCode" headerMenu="menu">
+                            <header>
+                                <Text text="Transporter Code"/>
+                            </header>
+                        </Column>
+                        <Column id="colVehicleNo" headerMenu="menu">
+                            <header>
+                                <Text text="Vehicle No"/>
+                            </header>
+                        </Column>
+                        <Column id="colVehicleType" headerMenu="menu">
+                            <header>
+                                <Text text="Vehicle Type"/>
+                            </header>
+                        </Column>
+                        <Column id="colVehicleCapacity" headerMenu="menu">
+                            <header>
+                                <Text text="Vehicle Capacity"/>
+                            </header>
+                        </Column>
+                        <Column id="colInvoiceNo" headerMenu="menu">
+                            <header>
+                                <Text text="Invoice No"/>
+                            </header>
+                        </Column>
+                    </columns>
+
+                    <!-- Rows -->
+                    <items>
+                        <ColumnListItem vAlign="Middle" type="Navigation">
+                            <cells>
+                                <Text text="{getListReport>GateEntryNo}"/>
+                                <Text text="{getListReport>Plant}"/>
+                                <Text text="{getListReport>TransporterCode}"/>
+                                <Text text="{getListReport>VehicleNo}"/>
+                                <Text text="{getListReport>VehicleType}"/>
+                                <Text text="{path:'getListReport>VehicleCapacity', formatter:'.formatter.roundToTwo'}"/>
+                                <Text text="{getListReport>InvoiceNo}"/>
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
+
+
+            </VBox>
+        </f:content>
+    </f:DynamicPage>
+</mvc:View>

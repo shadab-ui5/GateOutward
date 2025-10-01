@@ -1,30 +1,35 @@
 /* Enter your custom styles here */
 /* Target the Page header bar */
-.ICTBCustom .sapMPageHeader .sapMBar {
-    background: linear-gradient(
-        90deg,
-        #0057d2 0%,
-        rgba(0, 87, 210, 0.5) 75%,
-        #0057d2 100%
-    ),
-    url(../images/GlobalActionBar.jpg) no-repeat center center;
+
+.ICTBCustom>.sapMITH {
+    background: linear-gradient(90deg, #0057d2 0%, rgba(0, 87, 210, 0.5) 75%, #0057d2 100%), lightgray url(../images/GlobalActionBar.jpg) 0% 0% repeat;
     background-size: cover;
     color: white;
 }
 
-/* Make title text white */
-.ICTBCustom .sapMPageHeader .sapMBar .sapMTitle {
-    color: white !important;
+.ICTBCustom .sapMITBText {
+    font-size: 1.1rem !important;
     font-weight: 600;
+    color: whitesmoke !important;
+    /* smokewhite */
 }
 
-/* Style header buttons inside Page title bar */
-.ICTBCustom .sapMPageHeader .sapMBar .sapMBtnInner {
-    color: white !important;
-    border-color: white !important;
+/* Selected tab text */
+.ICTBCustom .sapMITBFilter.sapMITBSelected .sapMITBText {
+    color: #ffffff !important;
+    /* pure white */
+    font-weight: 600;
+    /* stronger emphasis */
 }
 
-/* Optional hover effect */
-.ICTBCustom .sapMPageHeader .sapMBar .sapMBtnInner:hover {
-    background-color: rgba(255, 255, 255, 0.2);
+.ICTBCustom .sapMITBSelected .sapMITBContentArrow::after {
+    background: white !important;
+}
+
+/* Increase Page Title font size */
+.MainPage .sapMTitle {
+    font-size: 1.2rem !important;
+    /* adjust as needed */
+    font-weight: 600;
+    /* optional: make it bolder */
 }
