@@ -88,7 +88,7 @@
                         <Column id="_IDGenColumn">
                             <Text id="_IDGenText" text="Line Item" />
                         </Column>
-                        <Column id="_IDGenColumn1">
+                        <Column id="_IDGenColumn1" visible="false">
                             <Text id="_IDGenText1" text="Sub Challan No" />
                         </Column>
                         <Column id="_IDGenColumn2">
